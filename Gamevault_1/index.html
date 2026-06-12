@@ -1,0 +1,1775 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GameVault - Premium Game Store</title>
+  <style>
+    :root {
+      --bg: #070911;
+      --bg-2: #0b0f1a;
+      --panel: rgba(16, 20, 32, 0.82);
+      --panel-solid: #111725;
+      --line: rgba(255, 255, 255, 0.12);
+      --line-strong: rgba(255, 255, 255, 0.2);
+      --text: #f4f7ff;
+      --muted: #a5aec2;
+      --muted-2: #747f97;
+      --cyan: #46d9ff;
+      --blue: #5b7cfa;
+      --violet: #8c6dff;
+      --rose: #ff5d91;
+      --gold: #f5c95c;
+      --green: #52d48a;
+      --danger: #ff6464;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(70, 217, 255, 0.13), transparent 34rem),
+        radial-gradient(circle at 84% 8%, rgba(255, 93, 145, 0.11), transparent 32rem),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 44%, #070911 100%);
+      color: var(--text);
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    ::selection {
+      background: rgba(70, 217, 255, 0.28);
+    }
+
+    #starfield {
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .soft-grid {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.65), transparent 70%);
+    }
+
+    .cursor,
+    .cursor-dot {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      display: none;
+    }
+
+    .cursor {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(70, 217, 255, 0.72);
+      border-radius: 50%;
+      box-shadow: 0 0 28px rgba(70, 217, 255, 0.28);
+      transition: width 140ms ease, height 140ms ease, border-color 140ms ease;
+    }
+
+    .cursor-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 18px var(--cyan);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      body {
+        cursor: none;
+      }
+
+      .cursor,
+      .cursor-dot {
+        display: block;
+      }
+
+      body.cursor-active .cursor {
+        width: 48px;
+        height: 48px;
+        border-color: rgba(255, 255, 255, 0.72);
+      }
+    }
+
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      border-bottom: 1px solid var(--line);
+      background: rgba(7, 9, 17, 0.76);
+      backdrop-filter: blur(20px);
+    }
+
+    .nav {
+      width: min(1180px, calc(100% - 32px));
+      height: 74px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 174px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      color: #fff;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.28), transparent 38%),
+        linear-gradient(135deg, var(--cyan), var(--blue) 48%, var(--rose));
+      box-shadow: 0 16px 36px rgba(70, 217, 255, 0.2);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .search {
+      width: 228px;
+      height: 42px;
+      padding: 0 14px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      outline: none;
+    }
+
+    .search:focus {
+      border-color: rgba(70, 217, 255, 0.7);
+      box-shadow: 0 0 0 4px rgba(70, 217, 255, 0.1);
+    }
+
+    .cart-button,
+    .primary-button,
+    .secondary-button,
+    .small-button,
+    .icon-button,
+    .filter-button,
+    .choice {
+      cursor: pointer;
+      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .cart-button:hover,
+    .primary-button:hover,
+    .secondary-button:hover,
+    .small-button:hover,
+    .icon-button:hover,
+    .filter-button:hover,
+    .choice:hover {
+      transform: translateY(-1px);
+    }
+
+    .cart-button {
+      min-width: 112px;
+      height: 42px;
+      padding: 0 15px;
+      border-radius: 999px;
+      color: white;
+      background: linear-gradient(135deg, var(--blue), var(--rose));
+      font-weight: 900;
+      box-shadow: 0 15px 34px rgba(91, 124, 250, 0.23);
+    }
+
+    .hero {
+      position: relative;
+      min-height: calc(100vh - 74px);
+      display: grid;
+      align-items: center;
+      padding: 62px 0 46px;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background:
+        linear-gradient(90deg, rgba(7, 9, 17, 0.96) 0%, rgba(7, 9, 17, 0.82) 42%, rgba(7, 9, 17, 0.46) 100%),
+        linear-gradient(180deg, rgba(7, 9, 17, 0.16) 0%, var(--bg) 100%);
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      overflow: hidden;
+    }
+
+    .hero-bg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.45;
+      filter: saturate(1.04) contrast(1.06);
+      transform: scale(1.04);
+    }
+
+    .hero-inner {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.95fr);
+      align-items: center;
+      gap: 44px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 18px;
+      padding: 7px 12px;
+      border: 1px solid rgba(70, 217, 255, 0.26);
+      border-radius: 999px;
+      background: rgba(70, 217, 255, 0.08);
+      color: #d5f8ff;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 18px var(--green);
+    }
+
+    .hero h1 {
+      max-width: 720px;
+      font-size: clamp(44px, 7vw, 90px);
+      line-height: 0.95;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .gradient-text {
+      color: transparent;
+      background: linear-gradient(135deg, #fff, var(--cyan) 42%, var(--rose));
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .hero-copy {
+      max-width: 620px;
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .primary-button,
+    .secondary-button {
+      min-height: 49px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 20px;
+      border-radius: 14px;
+      font-weight: 900;
+      color: white;
+    }
+
+    .primary-button {
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      box-shadow: 0 18px 42px rgba(70, 217, 255, 0.18);
+    }
+
+    .secondary-button {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--line);
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      max-width: 570px;
+      margin-top: 34px;
+    }
+
+    .stat {
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(16, 20, 32, 0.64);
+      backdrop-filter: blur(12px);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 25px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .showcase {
+      position: relative;
+      min-height: 560px;
+      perspective: 900px;
+    }
+
+    .showcase-card {
+      position: absolute;
+      width: 54%;
+      min-width: 220px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      overflow: hidden;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      transform-style: preserve-3d;
+      transition: transform 240ms ease, filter 240ms ease;
+    }
+
+    .showcase-card img {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+    }
+
+    .showcase-card.main {
+      right: 8%;
+      top: 6%;
+      z-index: 3;
+      transform: rotate(-2deg);
+    }
+
+    .showcase-card.side-a {
+      left: 2%;
+      top: 16%;
+      z-index: 2;
+      transform: rotate(4deg) scale(0.82);
+      filter: saturate(0.88) brightness(0.82);
+    }
+
+    .showcase-card.side-b {
+      left: 20%;
+      bottom: 0;
+      z-index: 1;
+      transform: rotate(-5deg) scale(0.72);
+      filter: saturate(0.82) brightness(0.76);
+    }
+
+    .showcase-panel {
+      position: absolute;
+      left: 3%;
+      right: 3%;
+      bottom: 28px;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 18px;
+      background: rgba(8, 10, 18, 0.78);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 22px 54px rgba(0, 0, 0, 0.35);
+    }
+
+    .showcase-panel h2 {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    .showcase-panel p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .price {
+      color: var(--gold);
+      font-size: 22px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .section {
+      padding: 74px 0;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 22px;
+      margin-bottom: 25px;
+    }
+
+    .kicker {
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .section-title {
+      margin-top: 6px;
+      font-size: clamp(28px, 4vw, 45px);
+      line-height: 1.05;
+    }
+
+    .section-copy {
+      max-width: 510px;
+      color: var(--muted);
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .filter-button {
+      min-height: 39px;
+      padding: 0 14px;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      font-weight: 900;
+    }
+
+    .filter-button.active {
+      color: var(--text);
+      border-color: rgba(70, 217, 255, 0.55);
+      background: rgba(70, 217, 255, 0.14);
+      box-shadow: 0 12px 28px rgba(70, 217, 255, 0.1);
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .game-card {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: rgba(16, 20, 32, 0.78);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+      transition: transform 190ms ease, border-color 190ms ease, box-shadow 190ms ease;
+    }
+
+    .game-card:hover {
+      border-color: rgba(70, 217, 255, 0.36);
+      box-shadow: 0 24px 62px rgba(0, 0, 0, 0.34);
+    }
+
+    .game-card.selected {
+      border-color: rgba(70, 217, 255, 0.74);
+      box-shadow: 0 0 0 4px rgba(70, 217, 255, 0.1), 0 24px 62px rgba(0, 0, 0, 0.36);
+    }
+
+    .cover-wrap {
+      position: relative;
+      overflow: hidden;
+      background: #111827;
+    }
+
+    .game-cover {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+      transition: transform 260ms ease, filter 260ms ease;
+    }
+
+    .game-card:hover .game-cover {
+      transform: scale(1.035);
+      filter: saturate(1.06);
+    }
+
+    .cover-wrap::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 54%, rgba(7, 9, 17, 0.72));
+      opacity: 0.82;
+    }
+
+    .tag-row {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill {
+      padding: 5px 9px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      background: rgba(7, 9, 17, 0.68);
+      color: #eff4ff;
+      font-size: 12px;
+      font-weight: 900;
+      backdrop-filter: blur(10px);
+    }
+
+    .game-info {
+      padding: 16px;
+    }
+
+    .game-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .game-info h3 {
+      min-height: 50px;
+      font-size: 20px;
+      line-height: 1.15;
+    }
+
+    .game-info p {
+      min-height: 43px;
+      margin: 8px 0 14px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .game-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .small-button {
+      min-height: 38px;
+      padding: 0 13px;
+      color: #e4fbff;
+      border: 1px solid rgba(70, 217, 255, 0.28);
+      border-radius: 11px;
+      background: rgba(70, 217, 255, 0.12);
+      font-weight: 900;
+    }
+
+    .small-button:hover {
+      background: rgba(70, 217, 255, 0.2);
+    }
+
+    .no-results {
+      grid-column: 1 / -1;
+      padding: 42px;
+      color: var(--muted);
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .detail-dock {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: none;
+    }
+
+    .detail-dock.open {
+      display: block;
+    }
+
+    .dock-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.58);
+      backdrop-filter: blur(8px);
+    }
+
+    .buy-panel {
+      position: absolute;
+      left: 50%;
+      bottom: 22px;
+      width: min(1080px, calc(100% - 32px));
+      max-height: calc(100vh - 44px);
+      overflow: auto;
+      transform: translateX(-50%);
+      border: 1px solid var(--line-strong);
+      border-radius: 24px;
+      background: rgba(14, 18, 30, 0.96);
+      box-shadow: var(--shadow);
+    }
+
+    .buy-layout {
+      display: grid;
+      grid-template-columns: 310px 1fr;
+      gap: 22px;
+      padding: 18px;
+    }
+
+    .buy-cover {
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #0d111d;
+    }
+
+    .buy-cover img {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+    }
+
+    .buy-content {
+      padding: 8px 4px 4px;
+    }
+
+    .buy-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .buy-title h2 {
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1;
+      margin: 8px 0;
+    }
+
+    .buy-title p {
+      max-width: 620px;
+      color: var(--muted);
+    }
+
+    .icon-button {
+      flex: 0 0 auto;
+      width: 40px;
+      height: 40px;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.07);
+      font-weight: 900;
+    }
+
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 12px 0 20px;
+    }
+
+    .choice {
+      min-height: 74px;
+      padding: 12px;
+      text-align: left;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.055);
+    }
+
+    .choice strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .choice span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .choice.active {
+      border-color: rgba(70, 217, 255, 0.68);
+      background: rgba(70, 217, 255, 0.13);
+      box-shadow: 0 0 0 4px rgba(70, 217, 255, 0.08);
+    }
+
+    .buy-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .final-price {
+      display: grid;
+      gap: 2px;
+    }
+
+    .final-price span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .final-price strong {
+      color: var(--gold);
+      font-size: 32px;
+      line-height: 1;
+    }
+
+    .cart-drawer {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: none;
+    }
+
+    .cart-drawer.open {
+      display: block;
+    }
+
+    .cart-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.62);
+      backdrop-filter: blur(7px);
+    }
+
+    .cart-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: min(430px, 100%);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      border-left: 1px solid var(--line);
+      background: #111725;
+      box-shadow: var(--shadow);
+    }
+
+    .cart-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .cart-items {
+      flex: 1;
+      overflow: auto;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      padding: 18px 0;
+    }
+
+    .cart-item {
+      display: grid;
+      grid-template-columns: 58px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .cart-item img {
+      width: 58px;
+      height: 58px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+
+    .cart-item h4 {
+      font-size: 14px;
+    }
+
+    .cart-item span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .remove {
+      color: var(--danger);
+      background: transparent;
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .cart-total {
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      font-size: 20px;
+      font-weight: 950;
+    }
+
+    .empty-state {
+      padding: 28px 16px;
+      color: var(--muted);
+      text-align: center;
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 120;
+      min-width: 260px;
+      padding: 14px 16px;
+      color: var(--text);
+      border: 1px solid rgba(82, 212, 138, 0.32);
+      border-radius: 14px;
+      background: rgba(17, 23, 37, 0.95);
+      box-shadow: var(--shadow);
+      transform: translateY(24px);
+      opacity: 0;
+      pointer-events: none;
+      transition: 180ms ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .footer {
+      padding: 34px 0;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .nav-links {
+        display: none;
+      }
+
+      .search {
+        width: min(42vw, 220px);
+      }
+
+      .hero {
+        min-height: auto;
+      }
+
+      .hero-inner {
+        grid-template-columns: 1fr;
+      }
+
+      .showcase {
+        min-height: 520px;
+      }
+
+      .games-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .buy-layout {
+        grid-template-columns: 230px 1fr;
+      }
+
+      .option-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .nav {
+        height: auto;
+        padding: 14px 0;
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .nav-actions {
+        width: 100%;
+      }
+
+      .search {
+        flex: 1;
+        width: auto;
+      }
+
+      .hero-stats,
+      .games-grid,
+      .buy-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .showcase {
+        min-height: 450px;
+      }
+
+      .showcase-card {
+        width: 62%;
+      }
+
+      .showcase-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .section-head,
+      .buy-head,
+      .buy-footer {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      .buy-panel {
+        bottom: 0;
+        width: 100%;
+        max-height: 94vh;
+        border-radius: 22px 22px 0 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="starfield" aria-hidden="true"></canvas>
+  <div class="soft-grid" aria-hidden="true"></div>
+  <div class="cursor" aria-hidden="true"></div>
+  <div class="cursor-dot" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="nav">
+      <a class="brand" href="#top" aria-label="GameVault home">
+        <span class="brand-mark">GV</span>
+        <span>GameVault</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#store">Store</a>
+        <a href="#popular">Popular</a>
+        <a href="#library">Library</a>
+      </nav>
+
+      <div class="nav-actions">
+        <input class="search" id="searchInput" type="search" placeholder="Search games" aria-label="Search games">
+        <button class="cart-button" id="openCart" type="button">Cart (0)</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-bg">
+        <img src="Photos for webs/my-concept-for-the-gta-vi-cover-art-v0-bygdb4jlmvze1.jpg" alt="">
+      </div>
+
+      <div class="hero-inner">
+        <div class="hero-copy-block">
+          <div class="eyebrow"><span class="pulse"></span> Premium game marketplace</div>
+          <h1>Choose games with <span class="gradient-text">confidence</span>.</h1>
+          <p class="hero-copy">
+            A polished game store concept with local cover art, smooth selection, a focused buying panel, and zero video previews covering the artwork.
+          </p>
+
+          <div class="hero-actions">
+            <a class="primary-button" href="#store">Browse Store</a>
+            <button class="secondary-button" id="heroPick" type="button">View Cyberpunk</button>
+          </div>
+
+          <div class="hero-stats">
+            <div class="stat">
+              <strong>8</strong>
+              <span>Curated titles</span>
+            </div>
+            <div class="stat">
+              <strong>Plain</strong>
+              <span>HTML, CSS, JS</span>
+            </div>
+            <div class="stat">
+              <strong>No</strong>
+              <span>Build setup needed</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="showcase" id="showcase">
+          <article class="showcase-card side-a">
+            <img src="Photos for webs/s-l1200.jpg" alt="Elden Ring cover art">
+          </article>
+          <article class="showcase-card side-b">
+            <img src="Photos for webs/which-cover-is-better-v0-kukkaczhsccb1.jpg" alt="Baldur's Gate 3 cover art">
+          </article>
+          <article class="showcase-card main">
+            <img src="Photos for webs/cp2077-cover-art-mock-up-v0-zd1rcpizw9331.webp" alt="Cyberpunk 2077 cover art">
+          </article>
+
+          <div class="showcase-panel">
+            <div>
+              <h2>Cyberpunk 2077</h2>
+              <p>Featured today with a clean, image-first buying flow.</p>
+            </div>
+            <button class="small-button" data-open-game="cyberpunk" type="button">Choose edition</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section shell" id="store">
+      <div class="section-head">
+        <div>
+          <div class="kicker">Store</div>
+          <h2 class="section-title">Pick a game, then choose how to buy.</h2>
+        </div>
+        <p class="section-copy">
+          The card opens a calm buying panel with platform and edition choices. No autoplay, no cover videos, no broken dependencies.
+        </p>
+      </div>
+
+      <div class="filters" id="filters">
+        <button class="filter-button active" data-filter="All" type="button">All</button>
+        <button class="filter-button" data-filter="RPG" type="button">RPG</button>
+        <button class="filter-button" data-filter="Action" type="button">Action</button>
+        <button class="filter-button" data-filter="FPS" type="button">FPS</button>
+        <button class="filter-button" data-filter="Sports" type="button">Sports</button>
+      </div>
+
+      <div class="games-grid" id="gamesGrid"></div>
+    </section>
+
+    <section class="section shell" id="popular">
+      <div class="section-head">
+        <div>
+          <div class="kicker">Popular</div>
+          <h2 class="section-title">Local covers, premium feel.</h2>
+        </div>
+        <p class="section-copy">
+          The layout keeps the artwork visible and gives each game enough space to breathe, without looking like a template.
+        </p>
+      </div>
+    </section>
+
+    <section class="section shell" id="library">
+      <div class="section-head">
+        <div>
+          <div class="kicker">Library</div>
+          <h2 class="section-title">Built for Live Server.</h2>
+        </div>
+        <p class="section-copy">
+          Save this as index.html beside your Photos for webs folder and open it in VS Code Live Server.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <aside class="detail-dock" id="detailDock" aria-hidden="true">
+    <div class="dock-backdrop" id="dockBackdrop"></div>
+    <div class="buy-panel" role="dialog" aria-modal="true" aria-label="Choose game options">
+      <div class="buy-layout">
+        <div class="buy-cover">
+          <img id="buyImage" src="" alt="">
+        </div>
+
+        <div class="buy-content">
+          <div class="buy-head">
+            <div class="buy-title">
+              <div class="kicker" id="buyGenre">Game</div>
+              <h2 id="buyTitle">Game title</h2>
+              <p id="buyDesc">Game description</p>
+            </div>
+            <button class="icon-button" id="closeDock" type="button" aria-label="Close buying panel">X</button>
+          </div>
+
+          <div>
+            <div class="kicker">Edition</div>
+            <div class="option-grid" id="editionOptions"></div>
+          </div>
+
+          <div>
+            <div class="kicker">Platform</div>
+            <div class="option-grid" id="platformOptions">
+              <button class="choice active" data-platform="PC" type="button"><strong>PC</strong><span>Windows download</span></button>
+              <button class="choice" data-platform="PlayStation" type="button"><strong>PlayStation</strong><span>Console license</span></button>
+              <button class="choice" data-platform="Xbox" type="button"><strong>Xbox</strong><span>Console license</span></button>
+            </div>
+          </div>
+
+          <div class="buy-footer">
+            <div class="final-price">
+              <span id="selectedSummary">Standard Edition on PC</span>
+              <strong id="finalPrice">$0.00</strong>
+            </div>
+            <button class="primary-button" id="confirmAdd" type="button">Add to cart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <aside class="cart-drawer" id="cartDrawer" aria-hidden="true">
+    <div class="cart-backdrop" id="cartBackdrop"></div>
+    <div class="cart-panel" role="dialog" aria-modal="true" aria-label="Shopping cart">
+      <div class="cart-head">
+        <div>
+          <div class="kicker">Checkout</div>
+          <h2>Your Cart</h2>
+        </div>
+        <button class="icon-button" id="closeCart" type="button" aria-label="Close cart">X</button>
+      </div>
+
+      <div class="cart-items" id="cartItems"></div>
+
+      <div class="cart-total">
+        <div class="total-row">
+          <span>Total</span>
+          <span id="cartTotal">$0.00</span>
+        </div>
+        <button class="primary-button" id="checkoutButton" type="button" style="width: 100%;">Checkout</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="toast" id="toast">Added to cart</div>
+
+  <footer class="footer">
+    <div class="shell footer-inner">
+      <a class="brand" href="#top">
+        <span class="brand-mark">GV</span>
+        <span>GameVault</span>
+      </a>
+      <span>Premium store concept for a simple Live Server workflow.</span>
+    </div>
+  </footer>
+
+  <script>
+    const games = [
+      {
+        id: "cyberpunk",
+        title: "Cyberpunk 2077",
+        genre: "RPG",
+        rating: "9.1",
+        basePrice: 59.99,
+        image: "Photos for webs/cp2077-cover-art-mock-up-v0-zd1rcpizw9331.webp",
+        desc: "A neon open-world RPG set in Night City with story choices, cyberware, and high style.",
+        editions: [
+          { name: "Standard", extra: 0, note: "Base game" },
+          { name: "Phantom Liberty", extra: 20, note: "Expansion included" },
+          { name: "Ultimate", extra: 30, note: "Complete package" }
+        ]
+      },
+      {
+        id: "elden",
+        title: "Elden Ring",
+        genre: "RPG",
+        rating: "9.6",
+        basePrice: 69.99,
+        image: "Photos for webs/s-l1200.jpg",
+        desc: "A dark fantasy action RPG with demanding bosses, open exploration, and unforgettable world design.",
+        editions: [
+          { name: "Standard", extra: 0, note: "Base game" },
+          { name: "Deluxe", extra: 10, note: "Artbook and soundtrack" },
+          { name: "Collector", extra: 35, note: "Premium extras" }
+        ]
+      },
+      {
+        id: "gta",
+        title: "Grand Theft Auto VI",
+        genre: "Action",
+        rating: "9.8",
+        basePrice: 79.99,
+        image: "Photos for webs/my-concept-for-the-gta-vi-cover-art-v0-bygdb4jlmvze1.jpg",
+        desc: "A stylish open-world action game concept with crime, cars, city life, and big set pieces.",
+        editions: [
+          { name: "Standard", extra: 0, note: "Base game" },
+          { name: "Deluxe", extra: 15, note: "Bonus cash pack" },
+          { name: "Vault", extra: 25, note: "Extra vehicles" }
+        ]
+      },
+      {
+        id: "warzone",
+        title: "Call of Duty Warzone",
+        genre: "FPS",
+        rating: "8.4",
+        basePrice: 0,
+        image: "Photos for webs/Gmfhhg8W0AAnlUM.jpg",
+        desc: "A free-to-play battle royale shooter with squads, loadouts, and fast tactical fights.",
+        editions: [
+          { name: "Free", extra: 0, note: "Base access" },
+          { name: "Starter", extra: 14.99, note: "Operator bundle" },
+          { name: "Pro Pack", extra: 29.99, note: "Skins and points" }
+        ]
+      },
+      {
+        id: "fc24",
+        title: "EA FC 24",
+        genre: "Sports",
+        rating: "7.8",
+        basePrice: 39.99,
+        image: "Photos for webs/images.jpg",
+        desc: "Football stars, clubs, rivalries, and Ultimate Team style progression.",
+        editions: [
+          { name: "Standard", extra: 0, note: "Base game" },
+          { name: "Ultimate", extra: 20, note: "Bonus packs" },
+          { name: "Club", extra: 28, note: "Extra cosmetics" }
+        ]
+      },
+      {
+        id: "baldurs",
+        title: "Baldur's Gate 3",
+        genre: "RPG",
+        rating: "9.7",
+        basePrice: 59.99,
+        image: "Photos for webs/which-cover-is-better-v0-kukkaczhsccb1.jpg",
+        desc: "A choice-driven party RPG with tactical combat, memorable characters, and deep replayability.",
+        editions: [
+          { name: "Standard", extra: 0, note: "Base game" },
+          { name: "Deluxe", extra: 10, note: "Digital extras" },
+          { name: "Party Pack", extra: 18, note: "Co-op extras" }
+        ]
+      },
+      {
+        id: "starfield",
+        title: "Starfield",
+        genre: "RPG",
+        rating: "8.1",
+        basePrice: 49.99,
+        image: "Photos for webs/its-often-overlooked-but-i-really-love-the-cover-art-for-v0-cv5gqmjzutod1.webp",
+        desc: "Space exploration, ships, planets, and a slower sci-fi adventure across the stars.",
+        editions: [
+          { name: "Standard", extra: 0, note: "Base game" },
+          { name: "Premium", extra: 20, note: "Story expansion" },
+          { name: "Explorer", extra: 30, note: "Cosmetic set" }
+        ]
+      },
+      {
+        id: "diablo",
+        title: "Diablo IV",
+        genre: "Action",
+        rating: "8.6",
+        basePrice: 44.99,
+        image: "Photos for webs/images (1).jpg",
+        desc: "Dark fantasy combat with loot, dungeons, demons, and seasonal action RPG progression.",
+        editions: [
+          { name: "Standard", extra: 0, note: "Base game" },
+          { name: "Deluxe", extra: 15, note: "Mount and cosmetics" },
+          { name: "Ultimate", extra: 25, note: "Premium extras" }
+        ]
+      }
+    ];
+
+    const state = {
+      filter: "All",
+      query: "",
+      cart: [],
+      selectedGame: null,
+      selectedEdition: 0,
+      selectedPlatform: "PC"
+    };
+
+    const gamesGrid = document.getElementById("gamesGrid");
+    const searchInput = document.getElementById("searchInput");
+    const cartButton = document.getElementById("openCart");
+    const detailDock = document.getElementById("detailDock");
+    const dockBackdrop = document.getElementById("dockBackdrop");
+    const closeDock = document.getElementById("closeDock");
+    const buyImage = document.getElementById("buyImage");
+    const buyGenre = document.getElementById("buyGenre");
+    const buyTitle = document.getElementById("buyTitle");
+    const buyDesc = document.getElementById("buyDesc");
+    const editionOptions = document.getElementById("editionOptions");
+    const platformOptions = document.getElementById("platformOptions");
+    const selectedSummary = document.getElementById("selectedSummary");
+    const finalPrice = document.getElementById("finalPrice");
+    const confirmAdd = document.getElementById("confirmAdd");
+    const cartDrawer = document.getElementById("cartDrawer");
+    const cartBackdrop = document.getElementById("cartBackdrop");
+    const closeCart = document.getElementById("closeCart");
+    const cartItems = document.getElementById("cartItems");
+    const cartTotal = document.getElementById("cartTotal");
+    const toast = document.getElementById("toast");
+
+    function money(value) {
+      return value === 0 ? "Free" : "$" + value.toFixed(2);
+    }
+
+    function getSelectedPrice() {
+      if (!state.selectedGame) return 0;
+      return state.selectedGame.basePrice + state.selectedGame.editions[state.selectedEdition].extra;
+    }
+
+    function filteredGames() {
+      const query = state.query.trim().toLowerCase();
+      return games.filter(function(game) {
+        const matchesFilter = state.filter === "All" || game.genre === state.filter;
+        const matchesQuery = !query ||
+          game.title.toLowerCase().includes(query) ||
+          game.genre.toLowerCase().includes(query);
+        return matchesFilter && matchesQuery;
+      });
+    }
+
+    function renderGames() {
+      const list = filteredGames();
+
+      if (!list.length) {
+        gamesGrid.innerHTML = '<div class="no-results">No games found. Try another search or filter.</div>';
+        return;
+      }
+
+      gamesGrid.innerHTML = list.map(function(game) {
+        const selected = state.selectedGame && state.selectedGame.id === game.id ? " selected" : "";
+        return `
+          <article class="game-card${selected}" data-card="${game.id}">
+            <div class="cover-wrap">
+              <img class="game-cover" src="${game.image}" alt="${game.title} cover art">
+              <div class="tag-row">
+                <span class="pill">${game.genre}</span>
+                <span class="pill">Rating ${game.rating}</span>
+              </div>
+            </div>
+            <div class="game-info">
+              <div class="game-meta">
+                <span>${game.genre}</span>
+                <span>${money(game.basePrice)}</span>
+              </div>
+              <h3>${game.title}</h3>
+              <p>${game.desc}</p>
+              <div class="game-bottom">
+                <span class="price">${money(game.basePrice)}</span>
+                <button class="small-button" data-open-game="${game.id}" type="button">Choose</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderBuyPanel() {
+      const game = state.selectedGame;
+      if (!game) return;
+
+      const edition = game.editions[state.selectedEdition];
+      buyImage.src = game.image;
+      buyImage.alt = game.title + " cover art";
+      buyGenre.textContent = game.genre + " / Rating " + game.rating;
+      buyTitle.textContent = game.title;
+      buyDesc.textContent = game.desc;
+      editionOptions.innerHTML = game.editions.map(function(item, index) {
+        return `
+          <button class="choice${index === state.selectedEdition ? " active" : ""}" data-edition="${index}" type="button">
+            <strong>${item.name}</strong>
+            <span>${item.note} - ${item.extra === 0 ? "Included" : "+" + money(item.extra)}</span>
+          </button>
+        `;
+      }).join("");
+      selectedSummary.textContent = edition.name + " Edition on " + state.selectedPlatform;
+      finalPrice.textContent = money(getSelectedPrice());
+      confirmAdd.textContent = getSelectedPrice() === 0 ? "Get game" : "Add to cart";
+    }
+
+    function openGame(id) {
+      const game = games.find(function(item) {
+        return item.id === id;
+      });
+      if (!game) return;
+
+      state.selectedGame = game;
+      state.selectedEdition = 0;
+      state.selectedPlatform = "PC";
+
+      platformOptions.querySelectorAll(".choice").forEach(function(button) {
+        button.classList.toggle("active", button.getAttribute("data-platform") === "PC");
+      });
+
+      renderGames();
+      renderBuyPanel();
+      detailDock.classList.add("open");
+      detailDock.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
+    }
+
+    function closeBuyPanel() {
+      detailDock.classList.remove("open");
+      detailDock.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("modal-open");
+    }
+
+    function renderCart() {
+      cartButton.textContent = "Cart (" + state.cart.length + ")";
+
+      if (!state.cart.length) {
+        cartItems.innerHTML = '<div class="empty-state">Your cart is empty. Choose a game from the store.</div>';
+        cartTotal.textContent = "$0.00";
+        return;
+      }
+
+      cartItems.innerHTML = state.cart.map(function(item, index) {
+        return `
+          <div class="cart-item">
+            <img src="${item.image}" alt="${item.title} cover art">
+            <div>
+              <h4>${item.title}</h4>
+              <span>${item.edition} / ${item.platform} - ${money(item.price)}</span>
+            </div>
+            <button class="remove" data-remove="${index}" type="button">Remove</button>
+          </div>
+        `;
+      }).join("");
+
+      const total = state.cart.reduce(function(sum, item) {
+        return sum + item.price;
+      }, 0);
+      cartTotal.textContent = "$" + total.toFixed(2);
+    }
+
+    function addCurrentGame() {
+      if (!state.selectedGame) return;
+
+      const game = state.selectedGame;
+      const edition = game.editions[state.selectedEdition];
+      const item = {
+        id: game.id,
+        title: game.title,
+        genre: game.genre,
+        image: game.image,
+        edition: edition.name,
+        platform: state.selectedPlatform,
+        price: getSelectedPrice()
+      };
+
+      if (item.price > 0) {
+        state.cart.push(item);
+        renderCart();
+      }
+
+      showToast(item.price === 0 ? game.title + " is ready to play" : game.title + " added to cart");
+      closeBuyPanel();
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(function() {
+        toast.classList.remove("show");
+      }, 1700);
+    }
+
+    function openCartDrawer() {
+      cartDrawer.classList.add("open");
+      cartDrawer.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
+    }
+
+    function closeCartDrawer() {
+      cartDrawer.classList.remove("open");
+      cartDrawer.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("modal-open");
+    }
+
+    document.addEventListener("click", function(event) {
+      const openButton = event.target.closest("[data-open-game]");
+      const removeButton = event.target.closest("[data-remove]");
+
+      if (openButton) {
+        openGame(openButton.getAttribute("data-open-game"));
+      }
+
+      if (removeButton) {
+        state.cart.splice(Number(removeButton.getAttribute("data-remove")), 1);
+        renderCart();
+      }
+    });
+
+    document.getElementById("heroPick").addEventListener("click", function() {
+      openGame("cyberpunk");
+    });
+
+    document.getElementById("filters").addEventListener("click", function(event) {
+      const button = event.target.closest("[data-filter]");
+      if (!button) return;
+
+      state.filter = button.getAttribute("data-filter");
+      document.querySelectorAll(".filter-button").forEach(function(item) {
+        item.classList.toggle("active", item === button);
+      });
+      renderGames();
+    });
+
+    searchInput.addEventListener("input", function(event) {
+      state.query = event.target.value;
+      renderGames();
+    });
+
+    editionOptions.addEventListener("click", function(event) {
+      const button = event.target.closest("[data-edition]");
+      if (!button) return;
+
+      state.selectedEdition = Number(button.getAttribute("data-edition"));
+      renderBuyPanel();
+    });
+
+    platformOptions.addEventListener("click", function(event) {
+      const button = event.target.closest("[data-platform]");
+      if (!button) return;
+
+      state.selectedPlatform = button.getAttribute("data-platform");
+      platformOptions.querySelectorAll(".choice").forEach(function(item) {
+        item.classList.toggle("active", item === button);
+      });
+      renderBuyPanel();
+    });
+
+    confirmAdd.addEventListener("click", addCurrentGame);
+    closeDock.addEventListener("click", closeBuyPanel);
+    dockBackdrop.addEventListener("click", closeBuyPanel);
+    cartButton.addEventListener("click", openCartDrawer);
+    closeCart.addEventListener("click", closeCartDrawer);
+    cartBackdrop.addEventListener("click", closeCartDrawer);
+
+    document.getElementById("checkoutButton").addEventListener("click", function() {
+      showToast(state.cart.length ? "Checkout preview only" : "Your cart is empty");
+    });
+
+    document.addEventListener("keydown", function(event) {
+      if (event.key === "Escape") {
+        closeBuyPanel();
+        closeCartDrawer();
+      }
+    });
+
+    function setupCursor() {
+      const cursor = document.querySelector(".cursor");
+      const dot = document.querySelector(".cursor-dot");
+      if (!cursor || !dot) return;
+
+      window.addEventListener("mousemove", function(event) {
+        cursor.style.transform = "translate(" + event.clientX + "px, " + event.clientY + "px) translate(-50%, -50%)";
+        dot.style.transform = "translate(" + event.clientX + "px, " + event.clientY + "px) translate(-50%, -50%)";
+      });
+
+      document.addEventListener("mouseover", function(event) {
+        if (event.target.closest("a, button, input, .game-card")) {
+          document.body.classList.add("cursor-active");
+        }
+      });
+
+      document.addEventListener("mouseout", function(event) {
+        if (event.target.closest("a, button, input, .game-card")) {
+          document.body.classList.remove("cursor-active");
+        }
+      });
+    }
+
+    function setupTilt() {
+      document.addEventListener("mousemove", function(event) {
+        const card = event.target.closest(".game-card");
+        if (!card || window.innerWidth < 800) return;
+
+        const rect = card.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width - 0.5;
+        const y = (event.clientY - rect.top) / rect.height - 0.5;
+        card.style.transform = "translateY(-4px) rotateX(" + (-y * 4).toFixed(2) + "deg) rotateY(" + (x * 4).toFixed(2) + "deg)";
+      });
+
+      document.addEventListener("mouseleave", function(event) {
+        const card = event.target.closest && event.target.closest(".game-card");
+        if (card) card.style.transform = "";
+      }, true);
+    }
+
+    function setupShowcaseMotion() {
+      const showcase = document.getElementById("showcase");
+      if (!showcase) return;
+
+      showcase.addEventListener("mousemove", function(event) {
+        if (window.innerWidth < 800) return;
+        const rect = showcase.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width - 0.5;
+        const y = (event.clientY - rect.top) / rect.height - 0.5;
+
+        showcase.querySelector(".main").style.transform = "rotate(" + (-2 + x * 3).toFixed(2) + "deg) translate(" + (x * 8).toFixed(1) + "px, " + (y * 8).toFixed(1) + "px)";
+        showcase.querySelector(".side-a").style.transform = "rotate(" + (4 - x * 2).toFixed(2) + "deg) scale(0.82) translate(" + (-x * 7).toFixed(1) + "px, " + (-y * 6).toFixed(1) + "px)";
+        showcase.querySelector(".side-b").style.transform = "rotate(" + (-5 + x * 2).toFixed(2) + "deg) scale(0.72) translate(" + (x * 6).toFixed(1) + "px, " + (-y * 5).toFixed(1) + "px)";
+      });
+    }
+
+    function setupStarfield() {
+      const canvas = document.getElementById("starfield");
+      const ctx = canvas.getContext("2d");
+      let stars = [];
+      let width = 0;
+      let height = 0;
+      let animationId = 0;
+
+      function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        const count = Math.min(120, Math.floor(width * height / 14000));
+        stars = Array.from({ length: count }, function() {
+          return {
+            x: Math.random() * width,
+            y: Math.random() * height,
+            r: Math.random() * 1.25 + 0.3,
+            speed: Math.random() * 0.22 + 0.05,
+            alpha: Math.random() * 0.55 + 0.18
+          };
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, width, height);
+        stars.forEach(function(star) {
+          star.y += star.speed;
+          if (star.y > height + 4) {
+            star.y = -4;
+            star.x = Math.random() * width;
+          }
+
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(190, 228, 255, " + star.alpha + ")";
+          ctx.fill();
+        });
+        animationId = window.requestAnimationFrame(draw);
+      }
+
+      resize();
+      draw();
+      window.addEventListener("resize", resize);
+      window.addEventListener("beforeunload", function() {
+        window.cancelAnimationFrame(animationId);
+      });
+    }
+
+    renderGames();
+    renderCart();
+    setupCursor();
+    setupTilt();
+    setupShowcaseMotion();
+    setupStarfield();
+  </script>
+</body>
+</html>
